@@ -22,7 +22,6 @@ const TEACHER_PLUGINS = [
     'expo-camera',
     { cameraPermission: 'Allow $(PRODUCT_NAME) to access your camera to scan attendance codes.' },
   ],
-  'expo-sqlite',
   [
     'react-native-nfc-manager',
     {
@@ -62,6 +61,9 @@ module.exports = ({ config }) => ({
   android: {
     ...variantConfig.android,
     permissions: IS_STUDENT ? STUDENT_ANDROID_PERMISSIONS : TEACHER_ANDROID_PERMISSIONS,
+    compileSdkVersion: 34, // Explicitly set this to avoid the error
+    targetSdkVersion: 34,
+    buildToolsVersion: "34.0.0"
   },
   ios: {
     ...variantConfig.ios,
