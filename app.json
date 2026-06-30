@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "AttendanceSuite",
+    "slug": "attendance-suite",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "platforms": ["android", "ios"],
+    "android": {
+      "package": "edu.cvsu.attendance",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.NFC",
+        "android.permission.WRITE_SETTINGS"
+      ]
+    },
+    "ios": {
+      "bundleIdentifier": "edu.cvsu.attendance",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Camera access is required to scan student QR codes.",
+        "NFCReaderUsageDescription": "NFC access is required for the teacher app to read student broadcast tags."
+      }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to scan attendance codes."
+        }
+      ],
+      "expo-sqlite",
+      [
+        "expo-brightness",
+        {
+          "permission": "Allow $(PRODUCT_NAME) to adjust screen brightness for QR visibility."
+        }
+      ],
+      [
+        "react-native-nfc-manager",
+        {
+          "nfcPermission": "Allow $(PRODUCT_NAME) to use NFC to read attendance broadcasts.",
+          "selectIdentifiers": [],
+          "systemCodes": []
+        }
+      ],
+      "./withHce.js"
+    ]
+  }
+}
