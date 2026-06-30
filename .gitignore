@@ -3,3 +3,6 @@
 /part 3.md
 /node_modules
 /android
+.env
+.expo
+%ProgramData%

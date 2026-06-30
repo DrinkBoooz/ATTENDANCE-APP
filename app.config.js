@@ -63,7 +63,10 @@ module.exports = ({ config }) => ({
     permissions: IS_STUDENT ? STUDENT_ANDROID_PERMISSIONS : TEACHER_ANDROID_PERMISSIONS,
     compileSdkVersion: 34, // Explicitly set this to avoid the error
     targetSdkVersion: 34,
-    buildToolsVersion: "34.0.0"
+    buildToolsVersion: "34.0.0",
+    buildFeatures: {
+      androidResources: true
+    }
   },
   ios: {
     ...variantConfig.ios,
