@@ -8,6 +8,7 @@ export async function getDb() {
   await dbInstance.execAsync('PRAGMA journal_mode = WAL;');
   await dbInstance.execAsync('PRAGMA foreign_keys = ON;');
   await initSchema(dbInstance);
+  await runMigrations(dbInstance);
   return dbInstance;
 }
 
@@ -25,6 +26,8 @@ async function initSchema(db) {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       subject_id INTEGER NOT NULL REFERENCES subjects(id) ON DELETE CASCADE,
       section_name TEXT NOT NULL,
+      start_time TEXT,
+      end_time TEXT,
       UNIQUE(subject_id, section_name)
     );
 
@@ -63,6 +66,18 @@ async function initSchema(db) {
     CREATE INDEX IF NOT EXISTS idx_logs_session ON attendance_logs(session_id);
     CREATE INDEX IF NOT EXISTS idx_enroll_section ON section_enrollments(section_id);
   `);
+}
+
+async function runMigrations(db) {
+  const columns = await db.getAllAsync(`PRAGMA table_info(sections);`);
+  const columnNames = new Set(columns.map((c) => c.name));
+
+  if (!columnNames.has('start_time')) {
+    await db.execAsync(`ALTER TABLE sections ADD COLUMN start_time TEXT;`);
+  }
+  if (!columnNames.has('end_time')) {
+    await db.execAsync(`ALTER TABLE sections ADD COLUMN end_time TEXT;`);
+  }
 }
 
 export async function wipeLibrary() {

@@ -3,6 +3,7 @@ import Papa from 'papaparse';
 import * as FileSystem from 'expo-file-system';
 import { randomBytes } from '@noble/hashes/utils';
 import { getDb } from './schema';
+import { parseScheduleWindow } from '../utils/scheduleTime';
 
 // Expected CSV columns: Course, Subject Code, Schedule Code, Section, Student Name, Student Number
 export async function importRosterFromCsv() {
@@ -51,12 +52,13 @@ export async function importRosterFromCsv() {
         `SELECT id FROM subjects WHERE subject_code = ? AND schedule_code = ?`,
         [subjectCode, scheduleCode]
       );
+      const { startTime, endTime } = parseScheduleWindow(scheduleCode);
 
       await db.runAsync(
-        `INSERT INTO sections (subject_id, section_name)
-         VALUES (?, ?)
-         ON CONFLICT(subject_id, section_name) DO NOTHING;`,
-        [subjectRow.id, sectionName]
+        `INSERT INTO sections (subject_id, section_name, start_time, end_time)
+         VALUES (?, ?, ?, ?)
+         ON CONFLICT(subject_id, section_name) DO UPDATE SET start_time = excluded.start_time, end_time = excluded.end_time;`,
+        [subjectRow.id, sectionName, startTime, endTime]
       );
 
       const sectionRow = await db.getFirstAsync(

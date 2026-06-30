@@ -1,6 +1,7 @@
 import NfcManager, { NfcTech } from 'react-native-nfc-manager';
 import { getDb } from '../database/schema';
 import { verifyCode, parseBroadcastPayload } from '../crypto/totp';
+import { isWithinSchedule } from '../utils/scheduleTime';
 
 const DEBOUNCE_MS = 5000;
 const recentScans = new Map(); // studentId -> last-accepted timestamp (ms)
@@ -43,11 +44,18 @@ export async function processScan(rawPayload, sessionId, lateThresholdSeconds = 
 
     const db = await getDb();
     const session = await db.getFirstAsync(
-      `SELECT started_at FROM class_sessions WHERE id = ? AND status = 'Active';`,
+      `SELECT cs.started_at, sec.start_time, sec.end_time
+       FROM class_sessions cs
+       JOIN sections sec ON sec.id = cs.section_id
+       WHERE cs.id = ? AND cs.status = 'Active';`,
       [sessionId]
     );
     if (!session) {
       return { studentId, accepted: false, reason: 'no_active_session' };
+    }
+
+    if (!isWithinSchedule(session.start_time, session.end_time)) {
+      return { studentId, accepted: false, reason: 'outside_schedule' };
     }
 
     const now = Math.floor(Date.now() / 1000);
